@@ -1,9 +1,12 @@
 import argparse
+import math
 import os
 import subprocess
 from PIL import Image  # Pillowライブラリをインポート
 
 TEMP_TEXT_PNG = ".temp.text.png"
+TEMP_OUTLINE_TEXT_PNG = ".temp.outline.png"
+OUTLINE_PERCENTAGE = 0.07
 
 
 def get_temp_image_name(nine_slice_image):
@@ -28,6 +31,33 @@ def print_cmd(cmd):
 def run_command(cmd):
     print_cmd(cmd)
     subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
+def create_outline_text_image(
+    width, height, text, font_name, font_size, output_image, blur=0
+):
+    # fmt: off
+    outline_size = max(1, math.ceil(float(font_size) * OUTLINE_PERCENTAGE))
+    cmd = []
+    cmd_1 = [
+        "magick", "-size", f"{width}x{height}", "xc:none",
+        "-font", f"{font_name}", "-background", "None", "-pointsize", f"{font_size}",
+        "-fill", "black", "-stroke", "black", "-strokewidth", f"{outline_size}", "-gravity", "center",
+        "-annotate", "0", f"{text}",
+    ]
+    cmd_blur = [
+        "-gaussian-blur", f"0x{blur}",
+    ]
+    cmd_2 = [
+        "-fill", "white", "-stroke", "none",
+        "-annotate", "0", f"{text}", f"{output_image}"
+    ]
+    # fmt: on
+    cmd.extend(cmd_1)
+    if blur is not None and blur > 0:
+        cmd.extend(cmd_blur)
+    cmd.extend(cmd_2)
+    run_command(cmd)
 
 
 def create_text_image(text, font_name, font_size, output_image):
@@ -69,11 +99,11 @@ def create_background_image(
     run_command(cmd)
 
 
-def create_speech_bubble_image(background_image, output_image):
+def create_speech_bubble_image(text_image, background_image, output_image):
     # fmt: off
     cmd = [
         "composite", "-gravity", "center",
-        f"{TEMP_TEXT_PNG}", f"{background_image}",
+        f"{text_image}", f"{background_image}",
         f"{output_image}"
     ]
     # fmt: on
@@ -92,10 +122,13 @@ def main():
     parser.add_argument("right", type=int, help="9slice right position")
     parser.add_argument("bottom", type=int, help="9slice bottom position")
     parser.add_argument("output_image", type=str, help="output image file")
+    parser.add_argument('-b', '--blur', type=int, help='blur power')
     args = parser.parse_args()
 
     create_text_image(args.text, args.font_name, args.font_size, TEMP_TEXT_PNG)
     text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
+
+    create_outline_text_image(text_img_width, text_img_height, args.text, args.font_name, args.font_size, TEMP_OUTLINE_TEXT_PNG, args.blur)
 
     temp_image_name = get_temp_image_name(args.nine_slice_image)
     create_background_image(
@@ -105,7 +138,9 @@ def main():
     )
     # fmt: on
 
-    create_speech_bubble_image(temp_image_name, args.output_image)
+    create_speech_bubble_image(
+        TEMP_OUTLINE_TEXT_PNG, temp_image_name, args.output_image
+    )
 
 
 if __name__ == "__main__":
