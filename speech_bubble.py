@@ -28,7 +28,7 @@ def _print_cmd(cmd):
     print(" ".join(output_cmd))
 
 
-def _run_command(cmd):
+def run_command(cmd):
     _print_cmd(cmd)
     subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
@@ -57,7 +57,7 @@ def _create_outline_text_image(
     if blur is not None and blur > 0:
         cmd.extend(cmd_blur)
     cmd.extend(cmd_2)
-    _run_command(cmd)
+    run_command(cmd)
 
 
 def _create_text_image(text, font_name, font_size, output_image):
@@ -68,7 +68,7 @@ def _create_text_image(text, font_name, font_size, output_image):
         f"label:{text}", f"{output_image}"
     ]
     # fmt: on
-    _run_command(cmd)
+    run_command(cmd)
 
 
 def _create_background_image(
@@ -96,7 +96,7 @@ def _create_background_image(
         f"{output_image}"
     ]
     # fmt: on
-    _run_command(cmd)
+    run_command(cmd)
 
 
 def _create_speech_bubble_image(text_image, background_image, output_image):
@@ -107,7 +107,7 @@ def _create_speech_bubble_image(text_image, background_image, output_image):
         f"{output_image}"
     ]
     # fmt: on
-    _run_command(cmd)
+    run_command(cmd)
 
 
 def speech_bubble(
