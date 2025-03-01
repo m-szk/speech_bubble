@@ -9,7 +9,7 @@ TEMP_OUTLINE_TEXT_PNG = ".temp.outline.png"
 OUTLINE_PERCENTAGE = 0.07
 
 
-def get_temp_image_name(nine_slice_image):
+def _get_temp_image_name(nine_slice_image):
     return f".temp.{os.path.basename(nine_slice_image)}"
 
 
@@ -18,7 +18,7 @@ def get_image_size(image_path):
         return img.size
 
 
-def print_cmd(cmd):
+def _print_cmd(cmd):
     output_cmd = []
     for c in cmd:
         if c == "(" or c == ")":
@@ -28,12 +28,12 @@ def print_cmd(cmd):
     print(" ".join(output_cmd))
 
 
-def run_command(cmd):
-    print_cmd(cmd)
+def _run_command(cmd):
+    _print_cmd(cmd)
     subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 
-def create_outline_text_image(
+def _create_outline_text_image(
     width, height, text, font_name, font_size, output_image, blur=0
 ):
     # fmt: off
@@ -57,10 +57,10 @@ def create_outline_text_image(
     if blur is not None and blur > 0:
         cmd.extend(cmd_blur)
     cmd.extend(cmd_2)
-    run_command(cmd)
+    _run_command(cmd)
 
 
-def create_text_image(text, font_name, font_size, output_image):
+def _create_text_image(text, font_name, font_size, output_image):
     # fmt: off
     cmd = [
         "magick", "-font", f"{font_name}",
@@ -68,10 +68,10 @@ def create_text_image(text, font_name, font_size, output_image):
         f"label:{text}", f"{output_image}"
     ]
     # fmt: on
-    run_command(cmd)
+    _run_command(cmd)
 
 
-def create_background_image(
+def _create_background_image(
     width, height, nine_slice_image, left, top, right, bottom, output_image
 ):
     img_width, img_height = get_image_size(nine_slice_image)
@@ -96,10 +96,10 @@ def create_background_image(
         f"{output_image}"
     ]
     # fmt: on
-    run_command(cmd)
+    _run_command(cmd)
 
 
-def create_speech_bubble_image(text_image, background_image, output_image):
+def _create_speech_bubble_image(text_image, background_image, output_image):
     # fmt: off
     cmd = [
         "composite", "-gravity", "center",
@@ -107,7 +107,36 @@ def create_speech_bubble_image(text_image, background_image, output_image):
         f"{output_image}"
     ]
     # fmt: on
-    run_command(cmd)
+    _run_command(cmd)
+
+
+def speech_bubble(
+    text,
+    font_name,
+    font_size,
+    nine_slice_image,
+    left,
+    top,
+    right,
+    bottom,
+    output_image,
+    blur=0,
+):
+    # fmt: off
+    _create_text_image(text, font_name, font_size, TEMP_TEXT_PNG)
+    text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
+
+    _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, TEMP_OUTLINE_TEXT_PNG, blur)
+
+    temp_image_name = _get_temp_image_name(nine_slice_image)
+    _create_background_image(
+        text_img_width, text_img_height,
+        nine_slice_image, left, top, right, bottom,
+        temp_image_name
+    )
+    # fmt: on
+
+    _create_speech_bubble_image(TEMP_OUTLINE_TEXT_PNG, temp_image_name, output_image)
 
 
 def main():
@@ -124,22 +153,19 @@ def main():
     parser.add_argument("output_image", type=str, help="output image file")
     parser.add_argument('-b', '--blur', type=int, help='blur power')
     args = parser.parse_args()
-
-    create_text_image(args.text, args.font_name, args.font_size, TEMP_TEXT_PNG)
-    text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
-
-    create_outline_text_image(text_img_width, text_img_height, args.text, args.font_name, args.font_size, TEMP_OUTLINE_TEXT_PNG, args.blur)
-
-    temp_image_name = get_temp_image_name(args.nine_slice_image)
-    create_background_image(
-        text_img_width, text_img_height,
-        args.nine_slice_image, args.left, args.top, args.right, args.bottom,
-        temp_image_name
-    )
     # fmt: on
 
-    create_speech_bubble_image(
-        TEMP_OUTLINE_TEXT_PNG, temp_image_name, args.output_image
+    speech_bubble(
+        args.text,
+        args.font_name,
+        args.font_size,
+        args.nine_slice_image,
+        args.left,
+        args.top,
+        args.right,
+        args.bottom,
+        args.output_image,
+        args.blur,
     )
 
 
