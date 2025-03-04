@@ -42,7 +42,7 @@ def _create_outline_text_image(
     cmd_1 = [
         "magick", "-size", f"{width}x{height}", "xc:none",
         "-font", f"{font_name}", "-background", "None", "-pointsize", f"{font_size}",
-        "-fill", "black", "-stroke", "black", "-strokewidth", f"{outline_size}", "-gravity", "center",
+        "-fill", "black", "-stroke", "black", "-strokewidth", f"{outline_size}", "-gravity", "West",
         "-annotate", "0", f"{text}",
     ]
     cmd_blur = [
@@ -65,7 +65,7 @@ def _create_text_image(text, font_name, font_size, output_image):
     cmd = [
         "magick", "-font", f"{font_name}",
         "-background", "None", "-pointsize", f"{font_size}",
-        f"label:{text}", f"{output_image}"
+        f"label:{text}", "-gravity", "West", f"{output_image}"
     ]
     # fmt: on
     run_command(cmd)
