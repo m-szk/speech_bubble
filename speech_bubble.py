@@ -34,7 +34,16 @@ def run_command(cmd):
 
 
 def _create_outline_text_image(
-    width, height, text, font_name, font_size, outline_percentage, output_image, blur=0
+    width,
+    height,
+    text,
+    font_name,
+    font_size,
+    font_color,
+    outline_percentage,
+    outline_color,
+    output_image,
+    blur=0,
 ):
     # fmt: off
     outline_size = max(1, math.ceil(float(font_size) * outline_percentage))
@@ -42,14 +51,14 @@ def _create_outline_text_image(
     cmd_1 = [
         "magick", "-size", f"{width}x{height}", "xc:none",
         "-font", f"{font_name}", "-background", "None", "-pointsize", f"{font_size}",
-        "-fill", "black", "-stroke", "black", "-strokewidth", f"{outline_size}", "-gravity", "West",
+        "-fill", f"{outline_color}", "-stroke", f"{outline_color}", "-strokewidth", f"{outline_size}", "-gravity", "West",
         "-annotate", "0", f"{text}",
     ]
     cmd_blur = [
         "-gaussian-blur", f"0x{blur}",
     ]
     cmd_2 = [
-        "-fill", "white", "-stroke", "none",
+        "-fill", f"{font_color}", "-stroke", "none",
         "-annotate", "0", f"{text}", f"{output_image}"
     ]
     # fmt: on
@@ -93,7 +102,7 @@ def _create_background_image(
         "(", "mpr:org", "-crop", f"{img_width - right}x{img_height - bottom}+{right}+{bottom}", "+repage", ")",
         "+append", "-write", "mpr:bottom", "+delete",
         "mpr:top", "mpr:middle", "mpr:bottom", "-append",
-        f"{output_image}"
+        f"PNG00:{output_image}"
     ]
     # fmt: on
     run_command(cmd)
@@ -114,7 +123,9 @@ def speech_bubble(
     text,
     font_name,
     font_size,
+    font_color,
     outline_percentage,
+    outline_color,
     nine_slice_image,
     left,
     top,
@@ -127,7 +138,7 @@ def speech_bubble(
     _create_text_image(text, font_name, font_size, TEMP_TEXT_PNG)
     text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
 
-    _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, outline_percentage, TEMP_OUTLINE_TEXT_PNG, blur)
+    _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, font_color, outline_percentage, outline_color, TEMP_OUTLINE_TEXT_PNG, blur)
 
     temp_image_name = _get_temp_image_name(nine_slice_image)
     _create_background_image(
@@ -146,7 +157,9 @@ def main():
     parser.add_argument("text", type=str, help="speech bubble text")
     parser.add_argument("font_name", type=str, help="font name")
     parser.add_argument("font_size", type=int, help="font size")
+    parser.add_argument("font_color", type=str, help="font color")
     parser.add_argument("outline_percentage", type=float, help="1.0 = 100%")
+    parser.add_argument("outline_color", type=str, help="outline color")
     parser.add_argument("nine_slice_image", type=str, help="speech bubble image")
     parser.add_argument("left", type=int, help="9slice left position")
     parser.add_argument("top", type=int, help="9slice top position")
@@ -161,7 +174,9 @@ def main():
         args.text,
         args.font_name,
         args.font_size,
+        args.font_color,
         args.outline_percentage,
+        args.outline_color,
         args.nine_slice_image,
         args.left,
         args.top,
