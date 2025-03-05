@@ -16,6 +16,7 @@ def main():
     parser.add_argument("srt_file", type=str, help="srt file")
     parser.add_argument("font_name", type=str, help="font name")
     parser.add_argument("font_size", type=str, help="font size")
+    parser.add_argument("outline_percentage", type=float, help="1.0 = 100%")
     parser.add_argument("nine_slice_image", type=str, help="speech bubble image")
     parser.add_argument("left", type=int, help="9slice left position")
     parser.add_argument("top", type=int, help="9slice top position")
@@ -36,6 +37,7 @@ def main():
             text,
             args.font_name,
             args.font_size,
+            args.outline_percentage,
             args.nine_slice_image,
             args.left,
             args.top,

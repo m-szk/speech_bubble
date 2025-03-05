@@ -34,10 +34,10 @@ def run_command(cmd):
 
 
 def _create_outline_text_image(
-    width, height, text, font_name, font_size, output_image, blur=0
+    width, height, text, font_name, font_size, outline_percentage, output_image, blur=0
 ):
     # fmt: off
-    outline_size = max(1, math.ceil(float(font_size) * OUTLINE_PERCENTAGE))
+    outline_size = max(1, math.ceil(float(font_size) * outline_percentage))
     cmd = []
     cmd_1 = [
         "magick", "-size", f"{width}x{height}", "xc:none",
@@ -114,6 +114,7 @@ def speech_bubble(
     text,
     font_name,
     font_size,
+    outline_percentage,
     nine_slice_image,
     left,
     top,
@@ -126,7 +127,7 @@ def speech_bubble(
     _create_text_image(text, font_name, font_size, TEMP_TEXT_PNG)
     text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
 
-    _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, TEMP_OUTLINE_TEXT_PNG, blur)
+    _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, outline_percentage, TEMP_OUTLINE_TEXT_PNG, blur)
 
     temp_image_name = _get_temp_image_name(nine_slice_image)
     _create_background_image(
@@ -144,7 +145,8 @@ def main():
     parser = argparse.ArgumentParser(description="Process text and 9slice image to speech bubble image.")
     parser.add_argument("text", type=str, help="speech bubble text")
     parser.add_argument("font_name", type=str, help="font name")
-    parser.add_argument("font_size", type=str, help="font size")
+    parser.add_argument("font_size", type=int, help="font size")
+    parser.add_argument("outline_percentage", type=float, help="1.0 = 100%")
     parser.add_argument("nine_slice_image", type=str, help="speech bubble image")
     parser.add_argument("left", type=int, help="9slice left position")
     parser.add_argument("top", type=int, help="9slice top position")
@@ -159,6 +161,7 @@ def main():
         args.text,
         args.font_name,
         args.font_size,
+        args.outline_percentage,
         args.nine_slice_image,
         args.left,
         args.top,
