@@ -81,13 +81,14 @@ def _create_text_image(text, font_name, font_size, output_image):
 
 
 def _create_background_image(
-    width, height, nine_slice_image, left, top, right, bottom, output_image
+    width, height, nine_slice_image, nine_slice_color, left, top, right, bottom, output_image, 
 ):
     img_width, img_height = get_image_size(nine_slice_image)
     print(f"{nine_slice_image} image size: {img_width}x{img_height}")
 
     # fmt: off
-    cmd = [
+    cmd = []
+    cmd_1 = [
         "magick", nine_slice_image, "-write", "mpr:org", "+delete",
         "(", "mpr:org", "-crop", f"{left}x{top}+0+0", "+repage", ")",
         "(", "mpr:org", "-crop", f"{right - left}x{top}+{left}+0", "-resize", f"{width}x{top}!", ")",
@@ -102,9 +103,18 @@ def _create_background_image(
         "(", "mpr:org", "-crop", f"{img_width - right}x{img_height - bottom}+{right}+{bottom}", "+repage", ")",
         "+append", "-write", "mpr:bottom", "+delete",
         "mpr:top", "mpr:middle", "mpr:bottom", "-append",
+    ]
+    cmd_nine_slice_color = [
+        "-fill", f"{nine_slice_color}", "-colorize", "100%",
+    ] 
+    cmd_2 = [
         f"PNG00:{output_image}"
     ]
     # fmt: on
+    cmd.extend(cmd_1)
+    if nine_slice_color:
+        cmd.extend(cmd_nine_slice_color)
+    cmd.extend(cmd_2)
     run_command(cmd)
 
 
@@ -120,6 +130,7 @@ def _create_speech_bubble_image(text_image, background_image, output_image):
 
 
 def speech_bubble(
+    output_image,
     text,
     font_name,
     font_size,
@@ -131,8 +142,8 @@ def speech_bubble(
     top,
     right,
     bottom,
-    output_image,
-    blur=0,
+    blur = 0,
+    nine_slice_color = None,
 ):
     # fmt: off
     _create_text_image(text, font_name, font_size, TEMP_TEXT_PNG)
@@ -143,7 +154,7 @@ def speech_bubble(
     temp_image_name = _get_temp_image_name(nine_slice_image)
     _create_background_image(
         text_img_width, text_img_height,
-        nine_slice_image, left, top, right, bottom,
+        nine_slice_image, nine_slice_color, left, top, right, bottom,
         temp_image_name
     )
     # fmt: on
@@ -167,10 +178,12 @@ def main():
     parser.add_argument("bottom", type=int, help="9slice bottom position")
     parser.add_argument("output_image", type=str, help="output image file")
     parser.add_argument('-b', '--blur', type=int, help='blur power')
+    parser.add_argument('-c', '--color', type=str, help='9slice color')
     args = parser.parse_args()
     # fmt: on
 
     speech_bubble(
+        args.output_image,
         args.text,
         args.font_name,
         args.font_size,
@@ -182,8 +195,8 @@ def main():
         args.top,
         args.right,
         args.bottom,
-        args.output_image,
         args.blur,
+        args.color
     )
 
 

@@ -26,6 +26,7 @@ def main():
     parser.add_argument("bottom", type=int, help="9slice bottom position")
     parser.add_argument("output_dir", type=str, help="output image directory")
     parser.add_argument('-b', '--blur', type=int, help='blur power')
+    parser.add_argument('-c', '--color', type=str, help='9slice color')
     args = parser.parse_args()
     # fmt: on
 
@@ -36,6 +37,7 @@ def main():
     for index, text in enumerate(get_text_list(args.srt_file)):
         output_image = os.path.join(args.output_dir, f"{index:03}.png")
         speech_bubble(
+            output_image,
             text,
             args.font_name,
             args.font_size,
@@ -47,8 +49,8 @@ def main():
             args.top,
             args.right,
             args.bottom,
-            output_image,
             args.blur,
+            args.color
         )
 
 
