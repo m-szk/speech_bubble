@@ -148,6 +148,8 @@ def speech_bubble(
     # fmt: off
     _create_text_image(text, font_name, font_size, TEMP_TEXT_PNG)
     text_img_width, text_img_height = get_image_size(TEMP_TEXT_PNG)
+    text_img_width += font_size * outline_percentage
+    text_img_height += font_size * outline_percentage
 
     _create_outline_text_image(text_img_width, text_img_height, text, font_name, font_size, font_color, outline_percentage, outline_color, TEMP_OUTLINE_TEXT_PNG, blur)
 
