@@ -1,6 +1,5 @@
 import argparse
 import os
-import subprocess
 import sys
 from speech_bubble import run_command
 
