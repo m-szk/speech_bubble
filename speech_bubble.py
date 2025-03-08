@@ -6,7 +6,6 @@ from PIL import Image  # Pillowライブラリをインポート
 
 TEMP_TEXT_PNG = ".temp.text.png"
 TEMP_OUTLINE_TEXT_PNG = ".temp.outline.png"
-OUTLINE_PERCENTAGE = 0.07
 
 
 def _get_temp_image_name(nine_slice_image):
