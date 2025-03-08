@@ -20,7 +20,7 @@ def create_1920x1080_image(icon_file, icon_x, icon_y, speech_bubble_dir, speech_
                 filepath = os.path.join(root, file)
                 output_filepath = os.path.join(output_dir, f"output_{file}")
                 cmd = [
-                    "convert", "-size", "1920x1080", "xc:none",
+                    "magick", "-size", "1920x1080", "xc:none",
                     f"{icon_file}", "-gravity", "southwest", "-geometry", f"+{icon_x}+{icon_y}", "-composite",
                     f"{filepath}", "-gravity", "southwest", "-geometry", f"+{speech_bubble_x}+{speech_bubble_y}", "-composite",
                     f"{output_filepath}"
